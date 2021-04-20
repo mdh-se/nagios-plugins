@@ -177,12 +177,12 @@ close(OPENSSL);
 $date =~ s/ +/ /g;
 
 my ($month, $day, $hour, $min, $sec, $year, $tz) = split(/[\s+|:]/, $date);
-print "m=$month, d=$day, h=$hour, m=$min, s=$sec, y=$year, z=$tz\n" if $debug;
+print "Certifikatet går ut $year-$month-$day $hour:$min $tz\n" if $debug;
 
 my $daysLeft = floor((timegm($sec, $min, $hour, $day, $months{$month}, $year - 1900) - time()) / 86400);
 print "daysLeft=$daysLeft\n" if $debug;
 
-my $cn="this certificate";
+my $cn="detta certifikat";
 # get the certificate name
 if ($verbose) {
   # different handling for certificates in a file
@@ -197,7 +197,7 @@ if ($verbose) {
       $openssl_cmd = "$openssl x509 -subject -noout -in $certificate_file $additional < /dev/null 2>&1 |";
     }
     open(OPENSSL, $openssl_cmd) || 
-      die "unable to open $openssl: $!";
+      die "kunde inte öppna $openssl: $!";
 
     while (<OPENSSL>) {
       if ( $_ =~ /^subject= (.*)/ ) {
@@ -217,7 +217,7 @@ if ($verbose) {
 
   } else {
     open(OPENSSL, "$openssl s_client -connect $host:$port $additional < /dev/null 2>&1 |") ||
-      die "unable to open $openssl: $!";
+      die "kunde inte öppna $openssl: $!";
 
     while (<OPENSSL>) {
       next unless $_ =~ /Certificate chain/;
@@ -240,16 +240,16 @@ if ($verbose) {
 }
 
 if ($daysLeft < 0) {
-  print "$PROGNAME: CRITICAL - $cn expired " . abs($daysLeft) . " day(s) ago.\n";
+  print "$PROGNAME: CRITICAL - $cn gick ut för " . abs($daysLeft) . " dag(ar) sedan.\n";
   exit $ERRORS{'CRITICAL'};
 } elsif ($daysLeft <= $critical) {
-  print "$PROGNAME: CRITICAL - only $daysLeft day(s) left for $cn.\n";
+  print "$PROGNAME: CRITICAL - endast $daysLeft dag(ar) kvar för $cn.\n";
   exit $ERRORS{'CRITICAL'};
 } elsif ($daysLeft <= $warning) {
-  print "$PROGNAME: WARNING - only $daysLeft day(s) left for $cn.\n";
+  print "$PROGNAME: WARNING - endast $daysLeft dag(ar) kvar för $cn.\n";
   exit $ERRORS{'WARNING'};
 } elsif ($verbose) {
-  print "$PROGNAME: $daysLeft day(s) left for $cn.\n";
+  print "$PROGNAME: $daysLeft dag(ar) kvar för $cn.\n";
 }
 
 exit $ERRORS{'OK'};
